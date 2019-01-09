@@ -3,10 +3,9 @@ package com.leyou.item.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.leyou.item.mapper.BrandMapper;
+import com.leyou.item.mapper.SkuMapper;
 import com.leyou.item.mapper.SpuMapper;
-import com.leyou.item.pojo.Brand;
-import com.leyou.item.pojo.Spu;
-import com.leyou.item.pojo.SpuBo;
+import com.leyou.item.pojo.*;
 import com.leyou.pojo.PageResult;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +29,9 @@ public class GoodsService {
 
     @Autowired
     private BrandMapper brandMapper;
+
+    @Autowired
+    private SkuMapper skuMapper;
 
     public PageResult<SpuBo> querySpuPage(Integer page, Integer rows, Boolean saleable, String key) {
         // 1、查询SPU
@@ -69,5 +72,34 @@ public class GoodsService {
         }).collect(Collectors.toList());
 
         return new PageResult<>(pageInfo.getTotal(), list);
+    }
+
+    public void saveGoods(Spu spu) {
+        //新增spu
+        spu.setId(null);
+        spu.setCreateTime(new Date());
+        spu.setLastUpdateTime(spu.getCreateTime());
+        spu.setSaleable(true);
+        spu.setValid(false);
+
+        int count = spuMapper.insert(spu);
+        if (count != 1) {
+            throw new RuntimeException();
+        }
+        //新增detail
+        SpuDetail detail = spu.getSpuDetail();
+        detail.setSpuId(spu.getId());
+
+        //新增sku
+        List<Sku> skus = spu.getSkus();
+        for (Sku sku : skus) {
+            sku.setCreateTime(new Date());
+            sku.setLastUpdateTime(sku.getCreateTime());
+            sku.setSpuId(spu.getId());
+            count = skuMapper.insert(sku);
+
+            //新增库存
+//            new Stock
+        }
     }
 }

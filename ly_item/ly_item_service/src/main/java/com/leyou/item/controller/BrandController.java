@@ -42,4 +42,11 @@ public class BrandController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+//    http://api.leyou.com/api/item/brand/cid/81
+    @GetMapping("cid/{cid}")
+    public ResponseEntity<List<Brand>> queryBrandByCid(
+            @PathVariable Long cid) {
+
+        return ResponseEntity.ok(this.brandService.queryBrandByCid(cid));
+    }
 }
